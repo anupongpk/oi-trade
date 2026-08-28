@@ -74,6 +74,10 @@
             justify-content: space-between;
         }
 
+        .card-full {
+            grid-column: 1 / -1;
+        }
+
         .card-header {
             margin-bottom: 15px;
         }
@@ -250,6 +254,37 @@
         .res-value.purple { color: var(--accent-purple); }
         .res-value.amber { color: var(--accent-amber); }
 
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .kpi-card {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .kpi-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .kpi-val {
+            font-size: 1.3rem;
+            font-weight: 800;
+        }
+
+        .kpi-sub {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
         .note {
             text-align: center;
             margin-top: 25px;
@@ -270,7 +305,7 @@
 
     <div class="header">
         <h1>📊 Quant Option Multi-SD & VOL2VOL Edge Calculator</h1>
-        <p>เครื่องมือคำนวณส่วนต่าง Basis Diff และวิเคราะห์ความน่าจะเป็นในการกลับตัว (Reversal Odds) ด้วยข้อมูลสถิติ CME 500 วัน</p>
+        <p>เครื่องมือคำนวณส่วนต่าง Basis Diff, กรอบ SD ความผันผวน และสรุปงานวิจัยกฎโมเมนตัม 25$ (CME Data 2 ปี)</p>
     </div>
 
     <div class="grid-container">
@@ -440,10 +475,71 @@
             </div>
         </div>
 
+        <!-- Card 3: Research Insights (25$ Momentum Rule Summary) -->
+        <div class="card card-full">
+            <div>
+                <div class="card-header">
+                    <div class="card-title">3. Research Insights: กฎโมเมนตัม $25 & Option Volume Spike</div>
+                    <div class="card-desc">
+                        สรุปผลงานวิจัย CME Intraday Option Data ย้อนหลัง 2 ปี (600 เหตุการณ์) สำหรับใช้เป็นสถิติอ้างอิง
+                    </div>
+                </div>
+
+                <!-- KPI Grid -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-title">Real Win Rate (วิ่ง 25$)</div>
+                        <div class="kpi-val" style="color: var(--accent-green);">76.83%</div>
+                        <div class="kpi-sub">ทฤษฎี: 82.50%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Strike Touch Rate</div>
+                        <div class="kpi-val" style="color: var(--accent-red);">58.20%</div>
+                        <div class="kpi-sub">โอกาสแตะเป้า Strike จริง</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Friction Cost Impact</div>
+                        <div class="kpi-val" style="color: var(--accent-amber);">-5.67%</div>
+                        <div class="kpi-sub">ช่องว่างจากความผันผวนจริง</div>
+                    </div>
+                </div>
+
+                <!-- Volatility Regimes -->
+                <div class="res-section-title">
+                    <span>⚡ Volatility Regime Filter (คัดกรองตามสภาวะตลาด)</span>
+                </div>
+                <div class="res-row">
+                    <span class="res-label">🔥 High Volatility (ข่าวแรง / มีเทรนด์):</span>
+                    <span class="res-value up">88.50% Win Rate</span>
+                </div>
+                <div class="res-row">
+                    <span class="res-label">⚖️ Normal Volatility (วันเทรดปกติ):</span>
+                    <span class="res-value amber">81.20% Win Rate</span>
+                </div>
+                <div class="res-row">
+                    <span class="res-label">⚠️ Low Volatility (ไซด์เวย์ / วันหยุด):</span>
+                    <span class="res-value down">64.50% Win Rate (ควรหลีกเลี่ยง)</span>
+                </div>
+
+                <!-- Distance Strategy -->
+                <div class="res-section-title" style="margin-top: 15px;">
+                    <span>🎯 Distance & Take Profit Rule (กลยุทธ์ระยะทาง)</span>
+                </div>
+                <div class="res-row">
+                    <span class="res-label">ระยะห่าง < $30:</span>
+                    <span class="res-value highlight">Touch Rate 90.0% | ถือทำกำไรได้ถึง Strike Price Target</span>
+                </div>
+                <div class="res-row">
+                    <span class="res-label">ระยะห่าง > $50:</span>
+                    <span class="res-value amber">Touch Rate 45.0% | ล็อค TP ที่ $25 เท่านั้น (ห้ามถือยาว)</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="note">
-        * <b>VOL2VOL Insight:</b> ระดับ ±1SD ไม่ใช่จุดกลับตัวที่มีนัยสำคัญ (อัตราสำเร็จเพียง 55.71% ถือเป็น Trend Continuation Signal) จุดกลับตัวที่มีความได้เปรียบทางสถิติสูงที่สุดอยู่ที่ <b>±2SD (78.57%)</b> และ <b>±3SD (91.43%)</b> ตามลำดับ (อ้างอิงงานวิจัย CME Data 500 วัน โดยวัดผล Reversal จากการย้อนกลับอย่างน้อย $25)
+        * <b>VOL2VOL & Research Insight:</b> ระดับ ±1SD ไม่ใช่จุดกลับตัวที่มีนัยสำคัญ (อัตราสำเร็จเพียง 55.71% ถือเป็น Trend Continuation Signal) จุดกลับตัวที่มีความได้เปรียบทางสถิติสูงที่สุดอยู่ที่ <b>±2SD (78.57%)</b> และ <b>±3SD (91.43%)</b> โดยสอดคล้องกับกฎโมเมนตัม $25 ซึ่งทำผลงานได้ดีที่สุดในสภาวะตลาด High Volatility (Win Rate 88.50%)
     </div>
 
     <script>
