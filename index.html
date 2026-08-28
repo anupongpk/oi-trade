@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quant Option 1 SD & Basis Diff Calculator</title>
+    <title>Quant Option Multi-SD & Basis Diff Calculator</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -194,12 +194,21 @@
             border-top: 1px dashed var(--card-border);
         }
 
+        .res-section-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-amber);
+            margin: 10px 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .res-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            margin-bottom: 6px;
+            font-size: 0.88rem;
         }
 
         .res-label {
@@ -235,8 +244,8 @@
 <body>
 
     <div class="header">
-        <h1>📊 Quant Option 1 SD & Basis Calculator</h1>
-        <p>เครื่องมือคำนวณส่วนต่าง Basis Diff และคำนวณกรอบความผันผวน 1 SD</p>
+        <h1>📊 Quant Option 1-3 SD & Basis Calculator</h1>
+        <p>เครื่องมือคำนวณส่วนต่าง Basis Diff และคำนวณกรอบความผันผวน 1SD, 2SD, 3SD</p>
     </div>
 
     <div class="grid-container">
@@ -294,15 +303,15 @@
         <div class="card">
             <div>
                 <div class="card-header">
-                    <div class="card-title">2. Exact 1 SD Calculator</div>
+                    <div class="card-title">2. Multi-SD Calculator (1SD / 2SD / 3SD)</div>
                     <div class="card-desc">
-                        คำนวณระยะแกว่ง 1 SD จาก Mean/Open, IV (%) และ DTE
+                        คำนวณกรอบความผันผวน 1SD (68%), 2SD (95%) และ 3SD (99%)
                     </div>
                 </div>
 
                 <div class="formula-box">
                     Move = Mean Price × IV × √( DTE / 365 )<br>
-                    <span style="font-size:0.85rem; color:#94a3b8; font-style:normal;">1 SD Range = Mean Price ± Move</span>
+                    <span style="font-size:0.85rem; color:#94a3b8; font-style:normal;">nSD Range = Mean Price ± (n × Move)</span>
                 </div>
 
                 <div class="input-group">
@@ -323,7 +332,7 @@
             </div>
 
             <div>
-                <button class="btn-calc" onclick="calcSD()">คำนวณ 1 SD</button>
+                <button class="btn-calc" onclick="calcSD()">คำนวณ 1SD, 2SD, 3SD</button>
 
                 <div class="results" id="sd_res_box" style="display: none;">
                     <div class="res-row">
@@ -334,14 +343,35 @@
                         <span class="res-label">ระยะ 1 SD Move:</span>
                         <span class="res-value highlight" id="res_sd_move">-</span>
                     </div>
-                    <hr style="border:0.5px dashed var(--card-border); margin: 8px 0;">
+
+                    <div class="res-section-title">🔹 1 SD Range (68.27% Probability)</div>
                     <div class="res-row">
-                        <span class="res-label">+1 SD Futures (แนวต้าน):</span>
-                        <span class="res-value up" id="res_sd_upper">-</span>
+                        <span class="res-label">+1 SD (แนวต้าน):</span>
+                        <span class="res-value up" id="res_sd1_upper">-</span>
                     </div>
                     <div class="res-row">
-                        <span class="res-label">-1 SD Futures (แนวรับ):</span>
-                        <span class="res-value down" id="res_sd_lower">-</span>
+                        <span class="res-label">-1 SD (แนวรับ):</span>
+                        <span class="res-value down" id="res_sd1_lower">-</span>
+                    </div>
+
+                    <div class="res-section-title">🔸 2 SD Range (95.45% Probability)</div>
+                    <div class="res-row">
+                        <span class="res-label">+2 SD (แนวต้าน):</span>
+                        <span class="res-value up" id="res_sd2_upper">-</span>
+                    </div>
+                    <div class="res-row">
+                        <span class="res-label">-2 SD (แนวรับ):</span>
+                        <span class="res-value down" id="res_sd2_lower">-</span>
+                    </div>
+
+                    <div class="res-section-title">🔺 3 SD Range (99.73% Probability)</div>
+                    <div class="res-row">
+                        <span class="res-label">+3 SD (แนวต้าน):</span>
+                        <span class="res-value up" id="res_sd3_upper">-</span>
+                    </div>
+                    <div class="res-row">
+                        <span class="res-label">-3 SD (แนวรับ):</span>
+                        <span class="res-value down" id="res_sd3_lower">-</span>
                     </div>
                 </div>
             </div>
@@ -350,7 +380,7 @@
     </div>
 
     <div class="note">
-        * <b>Note:</b> เมื่อกดปุ่ม "🔄 ดึงราคา FastBull" ระบบจะส่งราคา Futures ไปยังช่อง Mean / Open Price ของกล่องคำนวณ 1 SD ให้อัตโนมัติ
+        * <b>Note:</b> 1 SD ครอบคลุมความน่าจะเป็น ~68%, 2 SD ครอบคลุม ~95%, และ 3 SD ครอบคลุม ~99.7% ของกรอบราคา
     </div>
 
     <script>
@@ -380,7 +410,7 @@
 
                     document.getElementById('spot_price').value = spotPrice;
                     document.getElementById('fut_price').value = futPrice;
-                    document.getElementById('sd_mean').value = futPrice; // ส่งค่า Futures ไปยัง Mean ของกล่อง 2
+                    document.getElementById('sd_mean').value = futPrice;
                     
                     calcDiff();
                     btn.innerText = "✅ สำเร็จ!";
@@ -417,14 +447,13 @@
 
             document.getElementById('diff_res_box').style.display = 'block';
 
-            // ซิงค์ราคา Futures ไปยัง Mean/Open หากกล่อง 2 ยังไม่ได้กรอก
             const meanInput = document.getElementById('sd_mean');
             if (!meanInput.value) {
                 meanInput.value = fut;
             }
         }
 
-        // คำนวณกล่องที่ 2: 1 SD
+        // คำนวณกล่องที่ 2: Multi-SD (1SD, 2SD, 3SD)
         function calcSD() {
             const mean = parseFloat(document.getElementById('sd_mean').value);
             const iv = parseFloat(document.getElementById('sd_iv').value);
@@ -435,15 +464,26 @@
                 return;
             }
 
-            // สูตร: Move = Mean × (IV / 100) × √(DTE / 365)
-            const move = mean * (iv / 100) * Math.sqrt(dte / 365);
-            const upper = mean + move;
-            const lower = mean - move;
+            // คำนวณ Move Base 1 SD
+            const move1 = mean * (iv / 100) * Math.sqrt(dte / 365);
+            const move2 = move1 * 2;
+            const move3 = move1 * 3;
 
+            // แสดงค่า Base
             document.getElementById('res_sd_mean').innerText = mean.toFixed(2);
-            document.getElementById('res_sd_move').innerText = `±${move.toFixed(2)} Points`;
-            document.getElementById('res_sd_upper').innerText = upper.toFixed(2);
-            document.getElementById('res_sd_lower').innerText = lower.toFixed(2);
+            document.getElementById('res_sd_move').innerText = `±${move1.toFixed(2)} Points`;
+
+            // 1 SD
+            document.getElementById('res_sd1_upper').innerText = (mean + move1).toFixed(2);
+            document.getElementById('res_sd1_lower').innerText = (mean - move1).toFixed(2);
+
+            // 2 SD
+            document.getElementById('res_sd2_upper').innerText = (mean + move2).toFixed(2);
+            document.getElementById('res_sd2_lower').innerText = (mean - move2).toFixed(2);
+
+            // 3 SD
+            document.getElementById('res_sd3_upper').innerText = (mean + move3).toFixed(2);
+            document.getElementById('res_sd3_lower').innerText = (mean - move3).toFixed(2);
 
             document.getElementById('sd_res_box').style.display = 'block';
         }
