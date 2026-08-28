@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quant Option Multi-SD & Basis Diff Calculator (VOL2VOL Edition)</title>
+    <title>Quant Option Multi-SD & OI Gravity Calculator</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -60,7 +60,7 @@
             grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
             gap: 24px;
             width: 100%;
-            max-width: 1050px;
+            max-width: 1100px;
         }
 
         .card {
@@ -126,7 +126,7 @@
             font-weight: 500;
         }
 
-        .input-group input {
+        .input-group input, .input-group select {
             width: 100%;
             padding: 10px 12px;
             background-color: var(--input-bg);
@@ -137,7 +137,7 @@
             transition: border-color 0.2s;
         }
 
-        .input-group input:focus {
+        .input-group input:focus, .input-group select:focus {
             outline: none;
             border-color: var(--accent-cyan);
         }
@@ -285,6 +285,37 @@
             color: #64748b;
         }
 
+        /* Traffic Light UI */
+        .traffic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .traffic-card {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            padding: 12px;
+            border-top: 4px solid #64748b;
+        }
+
+        .traffic-card.green { border-top-color: var(--accent-green); }
+        .traffic-card.yellow { border-top-color: var(--accent-amber); }
+        .traffic-card.red { border-top-color: var(--accent-red); }
+
+        .traffic-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .traffic-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
         .note {
             text-align: center;
             margin-top: 25px;
@@ -304,8 +335,8 @@
 <body>
 
     <div class="header">
-        <h1>📊 Quant Option Multi-SD & VOL2VOL Edge Calculator</h1>
-        <p>เครื่องมือคำนวณส่วนต่าง Basis Diff, กรอบ SD ความผันผวน และสรุปงานวิจัยกฎโมเมนตัม 25$ (CME Data 2 ปี)</p>
+        <h1>📊 Quant Option Multi-SD & OI Gravity Calculator</h1>
+        <p>คำนวณ Basis Diff, กรอบ SD ความผันผวน และประเมินแรงโน้มถ่วง Open Interest (CME Gold Futures)</p>
     </div>
 
     <div class="grid-container">
@@ -361,19 +392,19 @@
             </div>
         </div>
 
-        <!-- Card 2: VOL2VOL Multi-SD Calculator -->
+        <!-- Card 2: VOL2VOL Multi-SD & OI Gravity Filter -->
         <div class="card">
             <div>
                 <div class="card-header">
-                    <div class="card-title">2. VOL2VOL Multi-SD & Reversal Model</div>
+                    <div class="card-title">2. VOL2VOL Multi-SD & OI Gravity Filter</div>
                     <div class="card-desc">
-                        คำนวณกรอบความผันผวนพร้อมสถิติโอกาสกลับตัว (Reversal Edge ≥ $25)
+                        คำนวณกรอบ SD ความผันผวน และวิเคราะห์สัญญาณการเทรดตามตำแหน่ง High OI Strike
                     </div>
                 </div>
 
                 <div class="formula-box">
                     Move = Mean Price × IV × √( DTE / 365 )<br>
-                    <span style="font-size:0.8rem; color:#94a3b8; font-style:normal;">Research Edge: CME 500-Day Dynamic Volatility</span>
+                    <span style="font-size:0.8rem; color:#94a3b8; font-style:normal;">Magnet Force: High OI Attraction (< $25)</span>
                 </div>
 
                 <div class="input-group">
@@ -391,12 +422,50 @@
                         <input type="number" id="sd_dte" placeholder="เช่น 1 หรือ 0.5" step="any">
                     </div>
                 </div>
+
+                <!-- OI Gravity Interactive Input -->
+                <div class="calc-mode-box" style="border-left-color: var(--accent-cyan); margin-top: 10px;">
+                    <div class="calc-mode-title" style="color: var(--accent-cyan);">
+                        <span>🧲 OI Gravity Direction Check:</span>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>ระยะห่างถึง High OI Strike ($):</label>
+                            <input type="number" id="oi_dist" placeholder="เช่น 20" value="20" step="any">
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>ทิศทางการเทรด:</label>
+                            <select id="oi_dir">
+                                <option value="toward">เข้าหา OI (Toward OI)</option>
+                                <option value="away">วิ่งหนี OI (Away from OI)</option>
+                                <option value="at_strike">อยู่ที่ระดับ Strike (At Strike)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div>
-                <button class="btn-calc" onclick="calcSD()">คำนวณ SD & VOL2VOL Reversal Edge</button>
+                <button class="btn-calc" onclick="calcSD()">คำนวณ SD & ประเมิน OI Signal</button>
 
                 <div class="results" id="sd_res_box" style="display: none;">
+                    
+                    <!-- Dynamic OI Gravity Signal Box -->
+                    <div id="oi_signal_box" class="kpi-card" style="margin-bottom: 12px; border-color: var(--accent-cyan); text-align: left;">
+                        <div class="res-row">
+                            <span class="res-label">OI Gravity Status:</span>
+                            <span class="res-value" id="oi_status_badge">-</span>
+                        </div>
+                        <div class="res-row">
+                            <span class="res-label">Est. Win Rate (OI Adjusted):</span>
+                            <span class="res-value" id="oi_winrate_val">-</span>
+                        </div>
+                        <div class="res-row">
+                            <span class="res-label">Market Zone Effect:</span>
+                            <span class="res-value highlight" id="oi_zone_val">-</span>
+                        </div>
+                    </div>
+
                     <div class="res-row">
                         <span class="res-label">Mean / Open Price:</span>
                         <span class="res-value purple" id="res_sd_mean">-</span>
@@ -475,37 +544,91 @@
             </div>
         </div>
 
-        <!-- Card 3: Research Insights (25$ Momentum Rule Summary) -->
+        <!-- Card 3: Research Insights (Market Gravity & OI Integration) -->
         <div class="card card-full">
             <div>
                 <div class="card-header">
-                    <div class="card-title">3. Research Insights: กฎโมเมนตัม $25 & Option Volume Spike</div>
+                    <div class="card-title">3. Research Insights: ทฤษฎีแรงโน้มถ่วงตลาด (OI Gravity & Momentum $25)</div>
                     <div class="card-desc">
-                        สรุปผลงานวิจัย CME Intraday Option Data ย้อนหลัง 2 ปี (600 เหตุการณ์) สำหรับใช้เป็นสถิติอ้างอิง
+                        สรุปผลงานวิจัย CME Gold Futures ย้อนหลัง 2 ปี: การใช้ Open Interest เป็นสนามแรงโน้มถ่วงคุมทิศทางราคา
                     </div>
                 </div>
 
                 <!-- KPI Grid -->
                 <div class="kpi-grid">
                     <div class="kpi-card">
-                        <div class="kpi-title">Real Win Rate (วิ่ง 25$)</div>
+                        <div class="kpi-title">Momentum Win Rate</div>
                         <div class="kpi-val" style="color: var(--accent-green);">76.83%</div>
-                        <div class="kpi-sub">ทฤษฎี: 82.50%</div>
+                        <div class="kpi-sub">กฎ $25 พื้นฐาน</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-title">Strike Touch Rate</div>
-                        <div class="kpi-val" style="color: var(--accent-red);">58.20%</div>
-                        <div class="kpi-sub">โอกาสแตะเป้า Strike จริง</div>
+                        <div class="kpi-title">Filtered OI Win Rate</div>
+                        <div class="kpi-val" style="color: var(--accent-cyan);">84.20%</div>
+                        <div class="kpi-sub">กรองผ่าน OI Density รวม</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-title">Friction Cost Impact</div>
-                        <div class="kpi-val" style="color: var(--accent-amber);">-5.67%</div>
-                        <div class="kpi-sub">ช่องว่างจากความผันผวนจริง</div>
+                        <div class="kpi-title">Toward OI Win Rate</div>
+                        <div class="kpi-val" style="color: #34d399;">78.00%</div>
+                        <div class="kpi-sub">เทรดเข้าหา High OI Strike</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Away from OI Win Rate</div>
+                        <div class="kpi-val" style="color: var(--accent-red);">52.10%</div>
+                        <div class="kpi-sub">เทรดสวนแรงโน้มถ่วง (เสี่ยงสูง)</div>
+                    </div>
+                </div>
+
+                <!-- Zoning Analysis -->
+                <div class="res-section-title">
+                    <span>🌌 Zoning Analysis (การวิเคราะห์ระดับแรงดึงดูด)</span>
+                </div>
+                <div class="res-row">
+                    <span class="res-label">🧲 โซนแรงดึงดูด (ระยะห่าง < $25):</span>
+                    <span class="res-value up">Correlation 0.88 | Magnet Effect เร่งความเร็วเข้าหาเป้า</span>
+                </div>
+                <div class="res-row">
+                    <span class="res-label">🌌 โซนสุญญากาศ (ระยะห่าง $25 - $50):</span>
+                    <span class="res-value amber">Correlation 0.65 | แรงเฉื่อยปานกลาง วิ่งตามเทคนิคอล</span>
+                </div>
+                <div class="res-row">
+                    <span class="res-label">🧱 โซนแรงต้าน (ที่ Strike / Max Pain):</span>
+                    <span class="res-value down">Correlation -0.45 | Repeller Effect ปฏิเสธราคา / เด้งกลับ</span>
+                </div>
+
+                <!-- Tactical Guide Traffic Lights -->
+                <div class="res-section-title" style="margin-top: 18px;">
+                    <span>🚥 Tactical Guide (ระบบสัญญาณไฟจราจรในการเข้าเทรด)</span>
+                </div>
+
+                <div class="traffic-grid">
+                    <div class="traffic-card green">
+                        <div class="traffic-title" style="color: var(--accent-green);">🟢 ไฟเขียว (Green Light)</div>
+                        <div class="traffic-desc">
+                            <b>เงื่อนไข:</b> เป้าหมาย OI อยู่ด้านหน้า ($20-$30)<br>
+                            <b>Action:</b> เข้าออเดอร์เชิงรุก (Aggressive)<br>
+                            <b>Win Rate:</b> 78.00% (ปล่อยไหลตามแรงดึงดูด)
+                        </div>
+                    </div>
+                    <div class="traffic-card yellow">
+                        <div class="traffic-title" style="color: var(--accent-amber);">🟡 ไฟเหลือง (Yellow Light)</div>
+                        <div class="traffic-desc">
+                            <b>เงื่อนไข:</b> วิ่งหนีออกจาก High OI Strike<br>
+                            <b>Action:</b> ลดขนาดไม้ / เทรดอย่างระมัดระวัง<br>
+                            <b>Win Rate:</b> 52.10% (สู้กับแรงโน้มถ่วง)
+                        </div>
+                    </div>
+                    <div class="traffic-card red">
+                        <div class="traffic-title" style="color: var(--accent-red);">🔴 ไฟแดง (Red Light)</div>
+                        <div class="traffic-desc">
+                            <b>เงื่อนไข:</b> ชนกำแพง High OI / Max Pain Wall<br>
+                            <b>Action:</b> ห้ามเทรด / ทำกำไรทันที<br>
+                            <b>Risk:</b> ระวังการ Rejection หรือเกิดการแกว่งตัวแรง
+                        </div>
                     </div>
                 </div>
 
                 <!-- Volatility Regimes -->
-                <div class="res-section-title">
+                <div class="res-section-title" style="margin-top: 18px;">
                     <span>⚡ Volatility Regime Filter (คัดกรองตามสภาวะตลาด)</span>
                 </div>
                 <div class="res-row">
@@ -520,26 +643,13 @@
                     <span class="res-label">⚠️ Low Volatility (ไซด์เวย์ / วันหยุด):</span>
                     <span class="res-value down">64.50% Win Rate (ควรหลีกเลี่ยง)</span>
                 </div>
-
-                <!-- Distance Strategy -->
-                <div class="res-section-title" style="margin-top: 15px;">
-                    <span>🎯 Distance & Take Profit Rule (กลยุทธ์ระยะทาง)</span>
-                </div>
-                <div class="res-row">
-                    <span class="res-label">ระยะห่าง < $30:</span>
-                    <span class="res-value highlight">Touch Rate 90.0% | ถือทำกำไรได้ถึง Strike Price Target</span>
-                </div>
-                <div class="res-row">
-                    <span class="res-label">ระยะห่าง > $50:</span>
-                    <span class="res-value amber">Touch Rate 45.0% | ล็อค TP ที่ $25 เท่านั้น (ห้ามถือยาว)</span>
-                </div>
             </div>
         </div>
 
     </div>
 
     <div class="note">
-        * <b>VOL2VOL & Research Insight:</b> ระดับ ±1SD ไม่ใช่จุดกลับตัวที่มีนัยสำคัญ (อัตราสำเร็จเพียง 55.71% ถือเป็น Trend Continuation Signal) จุดกลับตัวที่มีความได้เปรียบทางสถิติสูงที่สุดอยู่ที่ <b>±2SD (78.57%)</b> และ <b>±3SD (91.43%)</b> โดยสอดคล้องกับกฎโมเมนตัม $25 ซึ่งทำผลงานได้ดีที่สุดในสภาวะตลาด High Volatility (Win Rate 88.50%)
+        * <b>Market Gravity Summary:</b> สูตรสำเร็จตามงานวิจัยคือ <b>Volume Spike + OI Gravity</b> การเข้าเทรดทิศทางเดียวกับแรงดึงดูดของ Open Interest (Toward OI) จะให้เปรียบเชิงสถิติต่างจากการเทรดสวนทางอย่างมีนัยสำคัญ และควรระวังจุดกลับตัวรุนแรงที่ระดับ ±2SD (78.57%) และ ±3SD (91.43%) เมื่อราคาพุ่งเข้าชนกำแพง High OI
     </div>
 
     <script>
@@ -612,11 +722,13 @@
             }
         }
 
-        // คำนวณกล่องที่ 2: Multi-SD & VOL2VOL Reversal Target
+        // คำนวณกล่องที่ 2: Multi-SD & OI Gravity Evaluator
         function calcSD() {
             const mean = parseFloat(document.getElementById('sd_mean').value);
             const iv = parseFloat(document.getElementById('sd_iv').value);
             const dte = parseFloat(document.getElementById('sd_dte').value);
+            const oiDist = parseFloat(document.getElementById('oi_dist').value);
+            const oiDir = document.getElementById('oi_dir').value;
 
             if (isNaN(mean) || isNaN(iv) || isNaN(dte) || mean <= 0 || iv <= 0 || dte < 0) {
                 alert("กรุณากรอกข้อมูล Mean / Open Price, IV และ DTE ให้ถูกต้องครบถ้วน");
@@ -628,14 +740,13 @@
             const move2 = move1 * 2;
             const move3 = move1 * 3;
 
-            // Reversal Target threshold จากงานวิจัยคือ $25
             const REV_TARGET = 25.0;
 
             // แสดงค่า Base
             document.getElementById('res_sd_mean').innerText = mean.toFixed(2);
             document.getElementById('res_sd_move').innerText = `±${move1.toFixed(2)} Points`;
 
-            // 1 SD & Reversal Target
+            // 1 SD Target
             const sd1_u = mean + move1;
             const sd1_l = mean - move1;
             document.getElementById('res_sd1_upper').innerText = sd1_u.toFixed(2);
@@ -643,7 +754,7 @@
             document.getElementById('res_sd1_lower').innerText = sd1_l.toFixed(2);
             document.getElementById('res_sd1_l_target').innerText = `≥ ${(sd1_l + REV_TARGET).toFixed(2)}`;
 
-            // 2 SD & Reversal Target
+            // 2 SD Target
             const sd2_u = mean + move2;
             const sd2_l = mean - move2;
             document.getElementById('res_sd2_upper').innerText = sd2_u.toFixed(2);
@@ -651,13 +762,53 @@
             document.getElementById('res_sd2_lower').innerText = sd2_l.toFixed(2);
             document.getElementById('res_sd2_l_target').innerText = `≥ ${(sd2_l + REV_TARGET).toFixed(2)}`;
 
-            // 3 SD & Reversal Target
+            // 3 SD Target
             const sd3_u = mean + move3;
             const sd3_l = mean - move3;
             document.getElementById('res_sd3_upper').innerText = sd3_u.toFixed(2);
             document.getElementById('res_sd3_u_target').innerText = `≤ ${(sd3_u - REV_TARGET).toFixed(2)}`;
             document.getElementById('res_sd3_lower').innerText = sd3_l.toFixed(2);
             document.getElementById('res_sd3_l_target').innerText = `≥ ${(sd3_l + REV_TARGET).toFixed(2)}`;
+
+            // --- OI Gravity Logic Evaluation ---
+            const badgeEl = document.getElementById('oi_status_badge');
+            const winrateEl = document.getElementById('oi_winrate_val');
+            const zoneEl = document.getElementById('oi_zone_val');
+
+            if (oiDir === 'at_strike' || oiDist <= 0) {
+                badgeEl.innerText = "🔴 ไฟแดง (Red Light - At Wall)";
+                badgeEl.className = "res-value down";
+                winrateEl.innerText = "< 50.0% (Repeller Zone)";
+                winrateEl.className = "res-value down";
+                zoneEl.innerText = "🧱 โซนแรงต้าน (Max Pain / High OI Strike Wall)";
+            } else if (oiDir === 'away') {
+                badgeEl.innerText = "🟡 ไฟเหลือง (Yellow Light - Caution)";
+                badgeEl.className = "res-value amber";
+                winrateEl.innerText = "52.10% (สู้กับแรงโน้มถ่วง)";
+                winrateEl.className = "res-value amber";
+                zoneEl.innerText = "⚠️ เคลื่อนที่สวนทางแรงดึงดูด OI";
+            } else {
+                // Toward OI
+                if (oiDist <= 25) {
+                    badgeEl.innerText = "🟢 ไฟเขียว (Green Light - Strong Magnet)";
+                    badgeEl.className = "res-value up";
+                    winrateEl.innerText = "78.00% (High Acceleration)";
+                    winrateEl.className = "res-value up";
+                    zoneEl.innerText = "🧲 โซนแรงดึงดูดสูง (< $25 | Magnet Effect)";
+                } else if (oiDist <= 50) {
+                    badgeEl.innerText = "🟢 ไฟเขียวอ่อน (Vacuum Momentum)";
+                    badgeEl.className = "res-value highlight";
+                    winrateEl.innerText = "76.83% - 78.00%";
+                    winrateEl.className = "res-value highlight";
+                    zoneEl.innerText = "🌌 โซนสุญญากาศ ($25-$50 | วิ่งตามเทคนิคอล)";
+                } else {
+                    badgeEl.innerText = "🟡 ไฟเหลือง (Far Target)";
+                    badgeEl.className = "res-value amber";
+                    winrateEl.innerText = "45.0% (Touch Rate จากเป้าไกล)";
+                    winrateEl.className = "res-value amber";
+                    zoneEl.innerText = "🎯 ระยะห่าง > $50 (แนะนำล็อค TP ที่ $25)";
+                }
+            }
 
             document.getElementById('sd_res_box').style.display = 'block';
         }
