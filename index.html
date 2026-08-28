@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quant Option Multi-SD & Basis Diff Calculator</title>
+    <title>Quant Option Multi-SD & Basis Diff Calculator (VOL2VOL Edition)</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -60,7 +60,7 @@
             grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
             gap: 24px;
             width: 100%;
-            max-width: 950px;
+            max-width: 1050px;
         }
 
         .card {
@@ -195,13 +195,28 @@
         }
 
         .res-section-title {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 700;
             color: var(--accent-amber);
-            margin: 10px 0 5px 0;
+            margin: 14px 0 6px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .badge-edge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: none;
+        }
+
+        .badge-low { background: #334155; color: #94a3b8; }
+        .badge-mid { background: #065f46; color: #34d399; }
+        .badge-high { background: #854d0e; color: #fef08a; }
 
         .res-row {
             display: flex;
@@ -209,6 +224,16 @@
             align-items: center;
             margin-bottom: 6px;
             font-size: 0.88rem;
+        }
+
+        .res-subrow {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding-left: 10px;
+            border-left: 2px solid var(--card-border);
         }
 
         .res-label {
@@ -244,12 +269,13 @@
 <body>
 
     <div class="header">
-        <h1>📊 Quant Option 1-3 SD & Basis Calculator</h1>
-        <p>เครื่องมือคำนวณส่วนต่าง Basis Diff และคำนวณกรอบความผันผวน 1SD, 2SD, 3SD</p>
+        <h1>📊 Quant Option Multi-SD & VOL2VOL Edge Calculator</h1>
+        <p>เครื่องมือคำนวณส่วนต่าง Basis Diff และวิเคราะห์ความน่าจะเป็นในการกลับตัว (Reversal Odds) ด้วยข้อมูลสถิติ CME 500 วัน</p>
     </div>
 
     <div class="grid-container">
 
+        <!-- Card 1: Basis Diff -->
         <div class="card">
             <div>
                 <div class="card-header">
@@ -300,18 +326,19 @@
             </div>
         </div>
 
+        <!-- Card 2: VOL2VOL Multi-SD Calculator -->
         <div class="card">
             <div>
                 <div class="card-header">
-                    <div class="card-title">2. Multi-SD Calculator (1SD / 2SD / 3SD)</div>
+                    <div class="card-title">2. VOL2VOL Multi-SD & Reversal Model</div>
                     <div class="card-desc">
-                        คำนวณกรอบความผันผวน 1SD (68%), 2SD (95%) และ 3SD (99%)
+                        คำนวณกรอบความผันผวนพร้อมสถิติโอกาสกลับตัว (Reversal Edge ≥ $25)
                     </div>
                 </div>
 
                 <div class="formula-box">
                     Move = Mean Price × IV × √( DTE / 365 )<br>
-                    <span style="font-size:0.85rem; color:#94a3b8; font-style:normal;">nSD Range = Mean Price ± (n × Move)</span>
+                    <span style="font-size:0.8rem; color:#94a3b8; font-style:normal;">Research Edge: CME 500-Day Dynamic Volatility</span>
                 </div>
 
                 <div class="input-group">
@@ -332,7 +359,7 @@
             </div>
 
             <div>
-                <button class="btn-calc" onclick="calcSD()">คำนวณ 1SD, 2SD, 3SD</button>
+                <button class="btn-calc" onclick="calcSD()">คำนวณ SD & VOL2VOL Reversal Edge</button>
 
                 <div class="results" id="sd_res_box" style="display: none;">
                     <div class="res-row">
@@ -344,34 +371,70 @@
                         <span class="res-value highlight" id="res_sd_move">-</span>
                     </div>
 
-                    <div class="res-section-title">🔹 1 SD Range (68.27% Probability)</div>
+                    <!-- 1 SD Section -->
+                    <div class="res-section-title">
+                        <span>🔹 1 SD Range (Reach Freq: 70%)</span>
+                        <span class="badge-edge badge-low">Reversal: 55.71%</span>
+                    </div>
                     <div class="res-row">
                         <span class="res-label">+1 SD (แนวต้าน):</span>
                         <span class="res-value up" id="res_sd1_upper">-</span>
+                    </div>
+                    <div class="res-subrow">
+                        <span>Target กลับตัว (≥ $25):</span>
+                        <span id="res_sd1_u_target">-</span>
                     </div>
                     <div class="res-row">
                         <span class="res-label">-1 SD (แนวรับ):</span>
                         <span class="res-value down" id="res_sd1_lower">-</span>
                     </div>
+                    <div class="res-subrow">
+                        <span>Target กลับตัว (≥ $25):</span>
+                        <span id="res_sd1_l_target">-</span>
+                    </div>
 
-                    <div class="res-section-title">🔸 2 SD Range (95.45% Probability)</div>
+                    <!-- 2 SD Section -->
+                    <div class="res-section-title">
+                        <span>🔸 2 SD Range (Reach Freq: 40%)</span>
+                        <span class="badge-edge badge-mid">Reversal: 78.57%</span>
+                    </div>
                     <div class="res-row">
                         <span class="res-label">+2 SD (แนวต้าน):</span>
                         <span class="res-value up" id="res_sd2_upper">-</span>
+                    </div>
+                    <div class="res-subrow">
+                        <span>Target กลับตัว (≥ $25):</span>
+                        <span id="res_sd2_u_target">-</span>
                     </div>
                     <div class="res-row">
                         <span class="res-label">-2 SD (แนวรับ):</span>
                         <span class="res-value down" id="res_sd2_lower">-</span>
                     </div>
+                    <div class="res-subrow">
+                        <span>Target กลับตัว (≥ $25):</span>
+                        <span id="res_sd2_l_target">-</span>
+                    </div>
 
-                    <div class="res-section-title">🔺 3 SD Range (99.73% Probability)</div>
+                    <!-- 3 SD Section -->
+                    <div class="res-section-title">
+                        <span>🔺 3 SD Range (Reach Freq: 25%)</span>
+                        <span class="badge-edge badge-high">Reversal: 91.43% 🔥</span>
+                    </div>
                     <div class="res-row">
                         <span class="res-label">+3 SD (แนวต้าน):</span>
                         <span class="res-value up" id="res_sd3_upper">-</span>
                     </div>
+                    <div class="res-subrow">
+                        <span>Target กลับตัว (≥ $25):</span>
+                        <span id="res_sd3_u_target">-</span>
+                    </div>
                     <div class="res-row">
                         <span class="res-label">-3 SD (แนวรับ):</span>
                         <span class="res-value down" id="res_sd3_lower">-</span>
+                    </div>
+                    <div class="res-subrow">
+                        <span>Target กลับตัว (≥ $25):</span>
+                        <span id="res_sd3_l_target">-</span>
                     </div>
                 </div>
             </div>
@@ -380,7 +443,7 @@
     </div>
 
     <div class="note">
-        * <b>Note:</b> 1 SD ครอบคลุมความน่าจะเป็น ~68%, 2 SD ครอบคลุม ~95%, และ 3 SD ครอบคลุม ~99.7% ของกรอบราคา
+        * <b>VOL2VOL Insight:</b> ระดับ ±1SD ไม่ใช่จุดกลับตัวที่มีนัยสำคัญ (อัตราสำเร็จเพียง 55.71% ถือเป็น Trend Continuation Signal) จุดกลับตัวที่มีความได้เปรียบทางสถิติสูงที่สุดอยู่ที่ <b>±2SD (78.57%)</b> และ <b>±3SD (91.43%)</b> ตามลำดับ (อ้างอิงงานวิจัย CME Data 500 วัน โดยวัดผล Reversal จากการย้อนกลับอย่างน้อย $25)
     </div>
 
     <script>
@@ -453,7 +516,7 @@
             }
         }
 
-        // คำนวณกล่องที่ 2: Multi-SD (1SD, 2SD, 3SD)
+        // คำนวณกล่องที่ 2: Multi-SD & VOL2VOL Reversal Target
         function calcSD() {
             const mean = parseFloat(document.getElementById('sd_mean').value);
             const iv = parseFloat(document.getElementById('sd_iv').value);
@@ -469,24 +532,38 @@
             const move2 = move1 * 2;
             const move3 = move1 * 3;
 
+            // Reversal Target threshold จากงานวิจัยคือ $25
+            const REV_TARGET = 25.0;
+
             // แสดงค่า Base
             document.getElementById('res_sd_mean').innerText = mean.toFixed(2);
             document.getElementById('res_sd_move').innerText = `±${move1.toFixed(2)} Points`;
 
-            // 1 SD
-            document.getElementById('res_sd1_upper').innerText = (mean + move1).toFixed(2);
-            document.getElementById('res_sd1_lower').innerText = (mean - move1).toFixed(2);
+            // 1 SD & Reversal Target
+            const sd1_u = mean + move1;
+            const sd1_l = mean - move1;
+            document.getElementById('res_sd1_upper').innerText = sd1_u.toFixed(2);
+            document.getElementById('res_sd1_u_target').innerText = `≤ ${(sd1_u - REV_TARGET).toFixed(2)}`;
+            document.getElementById('res_sd1_lower').innerText = sd1_l.toFixed(2);
+            document.getElementById('res_sd1_l_target').innerText = `≥ ${(sd1_l + REV_TARGET).toFixed(2)}`;
 
-            // 2 SD
-            document.getElementById('res_sd2_upper').innerText = (mean + move2).toFixed(2);
-            document.getElementById('res_sd2_lower').innerText = (mean - move2).toFixed(2);
+            // 2 SD & Reversal Target
+            const sd2_u = mean + move2;
+            const sd2_l = mean - move2;
+            document.getElementById('res_sd2_upper').innerText = sd2_u.toFixed(2);
+            document.getElementById('res_sd2_u_target').innerText = `≤ ${(sd2_u - REV_TARGET).toFixed(2)}`;
+            document.getElementById('res_sd2_lower').innerText = sd2_l.toFixed(2);
+            document.getElementById('res_sd2_l_target').innerText = `≥ ${(sd2_l + REV_TARGET).toFixed(2)}`;
 
-            // 3 SD
-            document.getElementById('res_sd3_upper').innerText = (mean + move3).toFixed(2);
-            document.getElementById('res_sd3_lower').innerText = (mean - move3).toFixed(2);
+            // 3 SD & Reversal Target
+            const sd3_u = mean + move3;
+            const sd3_l = mean - move3;
+            document.getElementById('res_sd3_upper').innerText = sd3_u.toFixed(2);
+            document.getElementById('res_sd3_u_target').innerText = `≤ ${(sd3_u - REV_TARGET).toFixed(2)}`;
+            document.getElementById('res_sd3_lower').innerText = sd3_l.toFixed(2);
+            document.getElementById('res_sd3_l_target').innerText = `≥ ${(sd3_l + REV_TARGET).toFixed(2)}`;
 
             document.getElementById('sd_res_box').style.display = 'block';
-            
         }
     </script>
 </body>
