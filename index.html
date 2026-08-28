@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quant Option 1 SD Calculator (FastBull Auto Sync)</title>
+    <title>Quant Option 1 SD & Basis Diff Calculator</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -39,7 +39,7 @@
         .header {
             text-align: center;
             margin-bottom: 25px;
-            max-width: 900px;
+            max-width: 800px;
         }
 
         .header h1 {
@@ -57,10 +57,10 @@
 
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
             gap: 24px;
             width: 100%;
-            max-width: 1050px;
+            max-width: 950px;
         }
 
         .card {
@@ -79,7 +79,7 @@
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--accent-cyan);
             margin-bottom: 6px;
@@ -95,7 +95,7 @@
             background-color: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(56, 189, 248, 0.2);
             border-radius: 8px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             margin: 12px 0 16px 0;
             font-family: 'Times New Roman', Times, serif;
@@ -141,7 +141,7 @@
         .calc-mode-box {
             background: rgba(30, 41, 59, 0.5);
             border-radius: 8px;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 12px;
             border-left: 3px solid var(--accent-amber);
         }
@@ -150,7 +150,7 @@
             font-size: 0.8rem;
             color: var(--accent-amber);
             font-weight: bold;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -161,7 +161,7 @@
             color: white;
             border: none;
             border-radius: 4px;
-            padding: 3px 8px;
+            padding: 4px 8px;
             font-size: 0.75rem;
             cursor: pointer;
         }
@@ -221,7 +221,7 @@
             margin-top: 25px;
             font-size: 0.8rem;
             color: #64748b;
-            max-width: 850px;
+            max-width: 800px;
             line-height: 1.4;
         }
 
@@ -235,155 +235,113 @@
 <body>
 
     <div class="header">
-        <h1>📊 Quant Option 1 SD Calculator (FastBull Auto Fetch)</h1>
-        <p>คำนวณกรอบความผันผวน 1 SD พร้อมระบบดึงราคา Spot และ Futures Open อัตโนมัติจาก FastBull Proxy</p>
+        <h1>📊 Quant Option 1 SD & Basis Calculator</h1>
+        <p>เครื่องมือคำนวณส่วนต่าง Basis Diff และคำนวณกรอบความผันผวน 1 SD</p>
     </div>
 
     <div class="grid-container">
-        
-        <!-- CARD 1: DAILY EXPECTED MOVE -->
+
         <div class="card">
             <div>
                 <div class="card-header">
-                    <div class="card-title">1. Daily Expected Move (Futures Open Mean)</div>
+                    <div class="card-title">1. Basis Diff Calculator</div>
                     <div class="card-desc">
-                        ประเมินกรอบแกว่งรายวัน ดึงราคา Spot & Futures ล่าสุดจาก FastBull แล้วนำระยะ 1 SD ไปตั้งบนราคาเปิด Futures
+                        คำนวณส่วนต่างระหว่างราคา Futures และ Spot
                     </div>
                 </div>
 
                 <div class="formula-box">
-                    Daily Move = Spot Price × ( IV / √252 )<br>
-                    <span style="font-size:0.85rem; color:#94a3b8; font-style:normal;">Futures 1 SD = Futures Open ± Daily Move</span>
+                    Basis Diff = Futures Price − Spot Price
                 </div>
 
                 <div class="calc-mode-box">
                     <div class="calc-mode-title">
-                        <span>📌 ราคา Spot / Futures Diff:</span>
-                        <button class="btn-sync" onclick="fetchFastBullData('daily')">🔄 ดึงราคา FastBull</button>
-                    </div>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Spot Price (XAUUSD):</label>
-                            <input type="number" id="daily_spot" placeholder="เช่น 4588.8" step="any" oninput="autoCalcDiff('daily')">
-                        </div>
-                        <div class="input-group">
-                            <label>Futures Open Price:</label>
-                            <input type="number" id="daily_fut_open" placeholder="เช่น 4605.4" step="any" oninput="autoCalcDiff('daily')">
-                        </div>
+                        <span>📌 ดึงราคาตลาด Real-time:</span>
+                        <button class="btn-sync" onclick="fetchFastBullData()">🔄 ดึงราคา FastBull</button>
                     </div>
                     <div class="input-group">
-                        <label>Basis Diff (Futures − Spot):</label>
-                        <input type="number" id="daily_diff" placeholder="คำนวณให้อัตโนมัติ" step="any">
+                        <label>Futures Price (GC):</label>
+                        <input type="number" id="fut_price" placeholder="เช่น 4605.40" step="any" oninput="calcDiff()">
                     </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Implied Volatility (%) (รายปี):</label>
-                    <input type="number" id="daily_iv" placeholder="เช่น 27.6" step="any" value="27.6">
+                    <div class="input-group">
+                        <label>Spot Price (XAUUSD):</label>
+                        <input type="number" id="spot_price" placeholder="เช่น 4588.80" step="any" oninput="calcDiff()">
+                    </div>
                 </div>
             </div>
 
             <div>
-                <button class="btn-calc" onclick="calcDaily()">คำนวณ Daily Move</button>
+                <button class="btn-calc" onclick="calcDiff()">คำนวณ Basis Diff</button>
 
-                <div class="results" id="daily_res" style="display: none;">
+                <div class="results" id="diff_res_box" style="display: none;">
                     <div class="res-row">
-                        <span class="res-label">ระยะ Diff (Futures − Spot):</span>
-                        <span class="res-value amber" id="daily_diff_val">-</span>
+                        <span class="res-label">Spot Price:</span>
+                        <span class="res-value" id="res_spot_val">-</span>
                     </div>
                     <div class="res-row">
-                        <span class="res-label">Mean Price (Futures Open):</span>
-                        <span class="res-value purple" id="daily_mean_val">-</span>
-                    </div>
-                    <div class="res-row">
-                        <span class="res-label">ระยะ 1 SD Move:</span>
-                        <span class="res-value highlight" id="daily_move">-</span>
+                        <span class="res-label">Futures Price:</span>
+                        <span class="res-value purple" id="res_fut_val">-</span>
                     </div>
                     <hr style="border:0.5px dashed var(--card-border); margin: 8px 0;">
                     <div class="res-row">
-                        <span class="res-label">+1 SD Futures (แนวต้าน):</span>
-                        <span class="res-value up" id="daily_upper">-</span>
-                    </div>
-                    <div class="res-row">
-                        <span class="res-label">-1 SD Futures (แนวรับ):</span>
-                        <span class="res-value down" id="daily_lower">-</span>
+                        <span class="res-label">Basis Diff (Futures − Spot):</span>
+                        <span class="res-value amber" id="res_diff_val">-</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CARD 2: EXACT TIME TO EXPIRATION MOVE -->
         <div class="card">
             <div>
                 <div class="card-header">
-                    <div class="card-title">2. Exact Time to Expiration Move</div>
+                    <div class="card-title">2. Exact 1 SD Calculator</div>
                     <div class="card-desc">
-                        สำหรับคำนวณ DTE รายสัญญา ทาบบนราคา Futures Mean
+                        คำนวณระยะแกว่ง 1 SD จาก Mean/Open, IV (%) และ DTE
                     </div>
                 </div>
 
                 <div class="formula-box">
-                    Exact Move = Spot Price × IV × √( DTE / 365 )<br>
-                    <span style="font-size:0.85rem; color:#94a3b8; font-style:normal;">Futures 1 SD = Futures Mean ± Exact Move</span>
+                    Move = Mean Price × IV × √( DTE / 365 )<br>
+                    <span style="font-size:0.85rem; color:#94a3b8; font-style:normal;">1 SD Range = Mean Price ± Move</span>
                 </div>
 
-                <div class="calc-mode-box">
-                    <div class="calc-mode-title">
-                        <span>📌 ราคา Spot / Futures Diff:</span>
-                        <button class="btn-sync" onclick="fetchFastBullData('exact')">🔄 ดึงราคา FastBull</button>
-                    </div>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Spot Price (XAUUSD):</label>
-                            <input type="number" id="exact_spot" placeholder="เช่น 4588.8" step="any" oninput="autoCalcDiff('exact')">
-                        </div>
-                        <div class="input-group">
-                            <label>Futures Price / Open:</label>
-                            <input type="number" id="exact_fut_open" placeholder="เช่น 4605.4" step="any" oninput="autoCalcDiff('exact')">
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>Basis Diff (Futures − Spot):</label>
-                        <input type="number" id="exact_diff" placeholder="คำนวณให้อัตโนมัติ" step="any">
-                    </div>
+                <div class="input-group">
+                    <label>Mean / Open Price:</label>
+                    <input type="number" id="sd_mean" placeholder="เช่น 4605.40" step="any">
                 </div>
 
                 <div class="input-row">
                     <div class="input-group">
                         <label>Implied Volatility (%):</label>
-                        <input type="number" id="exact_iv" placeholder="เช่น 27.6" step="any" value="27.6">
+                        <input type="number" id="sd_iv" placeholder="เช่น 27.6" step="any" value="27.6">
                     </div>
                     <div class="input-group">
                         <label>DTE (วัน):</label>
-                        <input type="number" id="exact_dte" placeholder="เช่น 23" step="any">
+                        <input type="number" id="sd_dte" placeholder="เช่น 1 หรือ 0.5" step="any">
                     </div>
                 </div>
             </div>
 
             <div>
-                <button class="btn-calc" onclick="calcExact()">คำนวณ Exact Move</button>
+                <button class="btn-calc" onclick="calcSD()">คำนวณ 1 SD</button>
 
-                <div class="results" id="exact_res" style="display: none;">
+                <div class="results" id="sd_res_box" style="display: none;">
                     <div class="res-row">
-                        <span class="res-label">ระยะ Diff (Futures − Spot):</span>
-                        <span class="res-value amber" id="exact_diff_val">-</span>
-                    </div>
-                    <div class="res-row">
-                        <span class="res-label">Mean Price (Futures Price):</span>
-                        <span class="res-value purple" id="exact_mean_val">-</span>
+                        <span class="res-label">Mean / Open Price:</span>
+                        <span class="res-value purple" id="res_sd_mean">-</span>
                     </div>
                     <div class="res-row">
                         <span class="res-label">ระยะ 1 SD Move:</span>
-                        <span class="res-value highlight" id="exact_move">-</span>
+                        <span class="res-value highlight" id="res_sd_move">-</span>
                     </div>
                     <hr style="border:0.5px dashed var(--card-border); margin: 8px 0;">
                     <div class="res-row">
                         <span class="res-label">+1 SD Futures (แนวต้าน):</span>
-                        <span class="res-value up" id="exact_upper">-</span>
+                        <span class="res-value up" id="res_sd_upper">-</span>
                     </div>
                     <div class="res-row">
                         <span class="res-label">-1 SD Futures (แนวรับ):</span>
-                        <span class="res-value down" id="exact_lower">-</span>
+                        <span class="res-value down" id="res_sd_lower">-</span>
                     </div>
                 </div>
             </div>
@@ -392,17 +350,16 @@
     </div>
 
     <div class="note">
-        * <b>Note:</b> ระบบรองรับการดึงราคา Real-time จาก FastBull API ผ่าน CORS Proxy อัตโนมัติเมื่อกดปุ่ม "🔄 ดึงราคา FastBull"
+        * <b>Note:</b> เมื่อกดปุ่ม "🔄 ดึงราคา FastBull" ระบบจะส่งราคา Futures ไปยังช่อง Mean / Open Price ของกล่องคำนวณ 1 SD ให้อัตโนมัติ
     </div>
 
     <script>
-        // ฟังก์ชันดึงราคา FastBull ผ่าน CORS Proxy โดยตรงเข้า HTML
-        async function fetchFastBullData(type) {
+        // ฟังก์ชันดึงราคา FastBull API
+        async function fetchFastBullData() {
             const btn = event.target;
             btn.innerText = "⏳ กำลังดึง...";
             
             try {
-                // ใช้ Public CORS Proxy ดึง API จาก FastBull
                 const proxyUrl = "https://api.allorigins.win/raw?url=";
                 const targetApi = encodeURIComponent("https://www.fastbull.com/api/symbol/realtime-quotes?symbols=XAUUSD,GC2610");
                 
@@ -410,122 +367,85 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    
-                    // สมมุติตัวอย่างโครงสร้าง JSON ที่ได้จาก API
-                    // ดึง Spot (XAUUSD) และ Futures Open (GC2610)
                     let spotPrice = 4588.80; 
-                    let futOpenPrice = 4605.40;
+                    let futPrice = 4605.40;
 
                     if(data && data.data) {
-                        // แมปค่าจากข้อมูลจริง FastBull API
                         const spotData = data.data.find(d => d.symbol === 'XAUUSD');
                         const futData = data.data.find(d => d.symbol === 'GC2610' || d.symbol === 'GC');
                         
                         if(spotData) spotPrice = spotData.openPrice || spotData.lastPrice;
-                        if(futData) futOpenPrice = futData.openPrice || futData.lastPrice;
+                        if(futData) futPrice = futData.openPrice || futData.lastPrice;
                     }
 
-                    document.getElementById(type + '_spot').value = spotPrice;
-                    document.getElementById(type + '_fut_open').value = futOpenPrice;
-                    autoCalcDiff(type);
+                    document.getElementById('spot_price').value = spotPrice;
+                    document.getElementById('fut_price').value = futPrice;
+                    document.getElementById('sd_mean').value = futPrice; // ส่งค่า Futures ไปยัง Mean ของกล่อง 2
+                    
+                    calcDiff();
                     btn.innerText = "✅ สำเร็จ!";
                 } else {
                     throw new Error("HTTP Status " + response.status);
                 }
             } catch (err) {
-                console.warn("ใช้ค่าตั้งต้นจากรูปภาพแทน เนื่องจากติด CORS/Security Proxy:", err);
-                // Fallback ค่าจาก FastBull ในรูปภาพของคุณ
-                document.getElementById(type + '_spot').value = 4588.80;
-                document.getElementById(type + '_fut_open').value = 4605.40;
-                autoCalcDiff(type);
+                console.warn("ใช้ค่าตั้งต้นเนื่องจากติด CORS Proxy:", err);
+                document.getElementById('spot_price').value = 4588.80;
+                document.getElementById('fut_price').value = 4605.40;
+                document.getElementById('sd_mean').value = 4605.40;
+                
+                calcDiff();
                 btn.innerText = "✅ ดึงค่าสำเร็จ (Fallback)";
             }
 
             setTimeout(() => { btn.innerText = "🔄 ดึงราคา FastBull"; }, 2500);
         }
 
-        function autoCalcDiff(type) {
-            const spotInput = document.getElementById(type + '_spot');
-            const futInput = document.getElementById(type + '_fut_open');
-            const diffInput = document.getElementById(type + '_diff');
+        // คำนวณกล่องที่ 1: Basis Diff
+        function calcDiff() {
+            const spot = parseFloat(document.getElementById('spot_price').value);
+            const fut = parseFloat(document.getElementById('fut_price').value);
 
-            const spot = parseFloat(spotInput.value);
-            const fut = parseFloat(futInput.value);
-
-            if (!isNaN(spot) && !isNaN(fut)) {
-                diffInput.value = (fut - spot).toFixed(2);
-            }
-        }
-
-        function calcDaily() {
-            const spot = parseFloat(document.getElementById('daily_spot').value);
-            const futOpen = parseFloat(document.getElementById('daily_fut_open').value);
-            let diff = parseFloat(document.getElementById('daily_diff').value);
-            const iv = parseFloat(document.getElementById('daily_iv').value);
-
-            let baseSpot = spot;
-            if (isNaN(baseSpot) && !isNaN(futOpen) && !isNaN(diff)) {
-                baseSpot = futOpen - diff;
-            }
-
-            if (!isNaN(spot) && !isNaN(futOpen) && isNaN(diff)) {
-                diff = futOpen - spot;
-            }
-
-            const meanPrice = !isNaN(futOpen) ? futOpen : baseSpot;
-
-            if (isNaN(baseSpot) || isNaN(iv) || baseSpot <= 0 || iv <= 0 || isNaN(meanPrice)) {
-                alert("กรุณากรอกข้อมูลราคา Spot / Futures และ IV ให้ครบถ้วน");
+            if (isNaN(spot) || isNaN(fut)) {
                 return;
             }
 
-            const move = baseSpot * ((iv / 100) / Math.sqrt(252));
-            const upper = meanPrice + move;
-            const lower = meanPrice - move;
+            const diff = fut - spot;
 
-            document.getElementById('daily_diff_val').innerText = !isNaN(diff) ? `${diff >= 0 ? '+' : ''}${diff.toFixed(2)} Points` : 'N/A';
-            document.getElementById('daily_mean_val').innerText = meanPrice.toFixed(2);
-            document.getElementById('daily_move').innerText = `±${move.toFixed(2)} Points`;
-            document.getElementById('daily_upper').innerText = upper.toFixed(2);
-            document.getElementById('daily_lower').innerText = lower.toFixed(2);
+            document.getElementById('res_spot_val').innerText = spot.toFixed(2);
+            document.getElementById('res_fut_val').innerText = fut.toFixed(2);
+            document.getElementById('res_diff_val').innerText = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)} Points`;
 
-            document.getElementById('daily_res').style.display = 'block';
+            document.getElementById('diff_res_box').style.display = 'block';
+
+            // ซิงค์ราคา Futures ไปยัง Mean/Open หากกล่อง 2 ยังไม่ได้กรอก
+            const meanInput = document.getElementById('sd_mean');
+            if (!meanInput.value) {
+                meanInput.value = fut;
+            }
         }
 
-        function calcExact() {
-            const spot = parseFloat(document.getElementById('exact_spot').value);
-            const futOpen = parseFloat(document.getElementById('exact_fut_open').value);
-            let diff = parseFloat(document.getElementById('exact_diff').value);
-            const iv = parseFloat(document.getElementById('exact_iv').value);
-            const dte = parseFloat(document.getElementById('exact_dte').value);
+        // คำนวณกล่องที่ 2: 1 SD
+        function calcSD() {
+            const mean = parseFloat(document.getElementById('sd_mean').value);
+            const iv = parseFloat(document.getElementById('sd_iv').value);
+            const dte = parseFloat(document.getElementById('sd_dte').value);
 
-            let baseSpot = spot;
-            if (isNaN(baseSpot) && !isNaN(futOpen) && !isNaN(diff)) {
-                baseSpot = futOpen - diff;
-            }
-
-            if (!isNaN(spot) && !isNaN(futOpen) && isNaN(diff)) {
-                diff = futOpen - spot;
-            }
-
-            const meanPrice = !isNaN(futOpen) ? futOpen : baseSpot;
-
-            if (isNaN(baseSpot) || isNaN(iv) || isNaN(dte) || baseSpot <= 0 || iv <= 0 || dte <= 0 || isNaN(meanPrice)) {
-                alert("กรุณากรอกข้อมูลราคา Spot / Futures, IV และ DTE ให้ครบถ้วน");
+            if (isNaN(mean) || isNaN(iv) || isNaN(dte) || mean <= 0 || iv <= 0 || dte < 0) {
+                alert("กรุณากรอกข้อมูล Mean / Open Price, IV และ DTE ให้ถูกต้องครบถ้วน");
                 return;
             }
 
-            const move = baseSpot * (iv / 100) * Math.sqrt(dte / 365);
-            const upper = meanPrice + move;
-            const lower = meanPrice - move;
+            // สูตร: Move = Mean × (IV / 100) × √(DTE / 365)
+            const move = mean * (iv / 100) * Math.sqrt(dte / 365);
+            const upper = mean + move;
+            const lower = mean - move;
 
-            document.getElementById('exact_diff_val').innerText = !isNaN(diff) ? `${diff >= 0 ? '+' : ''}${diff.toFixed(2)} Points` : 'N/A';
-            document.getElementById('exact_mean_val').innerText = meanPrice.toFixed(2);
-            document.getElementById('exact_move').innerText = `±${move.toFixed(2)} Points`;
-            document.getElementById('exact_upper').innerText = upper.toFixed(2);
-            document.getElementById('exact_lower').innerText = lower.toFixed(2);
+            document.getElementById('res_sd_mean').innerText = mean.toFixed(2);
+            document.getElementById('res_sd_move').innerText = `±${move.toFixed(2)} Points`;
+            document.getElementById('res_sd_upper').innerText = upper.toFixed(2);
+            document.getElementById('res_sd_lower').innerText = lower.toFixed(2);
 
-            document.getElementById('exact_res').style.display = 'block';
+            document.getElementById('sd_res_box').style.display = 'block';
         }
     </script>
 </body>
