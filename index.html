@@ -71,7 +71,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            /* justify-content: space-between; */
         }
 
         /* .card-full {
@@ -344,6 +344,7 @@
         <!-- Card 1: Basis Diff -->
         <div class="card">
             <div>
+                <button class="btn-calc" onclick="calcDiff()">คำนวณ Basis Diff</button>
                 <div class="card-header">
                     <div class="card-title">1. Basis Diff Calculator</div>
                     <div class="card-desc">
@@ -372,7 +373,7 @@
             </div>
 
             <div>
-                <button class="btn-calc" onclick="calcDiff()">คำนวณ Basis Diff</button>
+                <!-- <button class="btn-calc" onclick="calcDiff()">คำนวณ Basis Diff</button> -->
 
                 <div class="results" id="diff_res_box" style="display: none;">
                     <div class="res-row">
@@ -395,6 +396,7 @@
         <!-- Card 2: VOL2VOL Multi-SD & OI Gravity Filter -->
         <div class="card">
             <div>
+                <button class="btn-calc" onclick="calcSD()">คำนวณ SD & ประเมิน OI Signal</button>
                 <div class="card-header">
                     <div class="card-title">2. VOL2VOL Multi-SD & OI Gravity Filter</div>
                     <div class="card-desc">
@@ -446,7 +448,7 @@
             </div>
 
             <div>
-                <button class="btn-calc" onclick="calcSD()">คำนวณ SD & ประเมิน OI Signal</button>
+                <!-- <button class="btn-calc" onclick="calcSD()">คำนวณ SD & ประเมิน OI Signal</button> -->
 
                 <div class="results" id="sd_res_box" style="display: none;">
                     
